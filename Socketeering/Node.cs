@@ -114,7 +114,7 @@ namespace Socketeering
             catch (Exception ex)
             {
                 Console.WriteLine("ERR: Connectivity check failed" + ex.Message);
-                supported = false;
+                supported = true;
                 return false;
             }
         }
@@ -187,6 +187,9 @@ namespace Socketeering
             {
                 case NodeControl.INFO:
                     Console.WriteLine($"INFO: {incoming.Source}: {String.Join(",", incoming.ControlArgs.ToArray())}");
+                    break;
+                case NodeControl.TIME_SYNC:
+                    Console.WriteLine($"Time update: {incoming.Source}: {incoming.ControlArgs["TIME"]}");
                     break;
                 case NodeControl.DISCONNECTING:
                     string? waitTime;
