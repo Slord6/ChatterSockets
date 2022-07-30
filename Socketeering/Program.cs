@@ -1,4 +1,5 @@
 ﻿using Socketeering;
+using Socketeering.Messages;
 using System.Net;
 
 public class Program
@@ -8,35 +9,16 @@ public class Program
 
     public static void Main(string[] args)
     {
-        Console.WriteLine($"Hello, I am {NameGenerator.GetName()}");
         Gateway gateway = new Gateway(PORT, MULTICASTADDRESS);
+        Node node = new Node(gateway);
+        Console.WriteLine(node.Name + " active");
 
-        Task sendTask = InteractiveSend(gateway);
-        sendTask.Start();
-
-        gateway.RecvMessageContinuous((string message) =>
-        {
-            Console.WriteLine("Incoming>>");
-            Console.WriteLine(message);
-            Console.WriteLine("<<End");
-        });
-        sendTask.Wait();
-    }
-
-    public static Task InteractiveSend(Gateway gateway)
-    {
-        return new Task(() =>
-        {
-            while (true)
-            {
-                Console.Write(">");
-                string? input = Console.ReadLine();
-                if (input == "_CLOSE") return;
-                if (input == null) throw new Exception("NULL input from console");
-
-                gateway.Send(input);
-            }
-        });
+        Task autoRespond = node.CreateAutoRespond();
+        autoRespond.Start();
+        
+        Task interactiveSend = node.CreateInteractiveSend();
+        interactiveSend.Start();
+        interactiveSend.Wait();
     }
 
 }

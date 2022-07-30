@@ -83,8 +83,10 @@ namespace Socketeering
             await sendTask;
         }
 
-        public Task RecvMessageContinuous(Action<string> onMessage)
+        public Task RecvMessageContinuous(Action<string> onMessage, CancellationToken? token = null)
         {
+            CancellationToken cancellationToken = token ?? CancellationToken.None;
+
             Task recvTask = new Task(() =>
             {
                 while (true)
@@ -92,19 +94,10 @@ namespace Socketeering
                     string msg = RecvMessageSync();
                     onMessage(msg);
                 }
-            });
+            }, cancellationToken);
             recvTask.Start();
             return recvTask;
         }
-
-        //public IEnumerable<string> RecvMessageContinuous()
-        //{
-        //    while (true)
-        //    {
-        //        string message = RecvMessageSync();
-        //        yield return message;
-        //    }
-        //}
 
         public string RecvMessageSync()
         {
