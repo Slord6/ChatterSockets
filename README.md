@@ -135,6 +135,56 @@ RELAY = 204,
 /// </summary>
 ECHO = 205,
 /// <summary>
+/// Notify of a node-specific service that is available
+/// MUST send a different message for each available service
+/// MUST notify when a service becomes newly available
+/// SHOULD periodically notify therafter
+/// For standard services (3*)
+///     MUST set arg - MESSAGE:::[type of message]
+///     MAY set arg - ARGS:::[required arg types and descriptions]
+///     MAY set arg - DESCRIPTION:::[description of service]
+///     MAY set arg - VERSION:::[version of the advertised service]
+/// For non-standard services (4*/5*):
+///     MUST set arg - DESCRIPTION:::[description of service]
+///     MUST set arg - MESSAGE:::[new type of message to use and its number]
+///     MUST set arg - ARGS:::[required arg types and descriptions]
+///     MUST set arg - VERSION:::[version of the advertised service]
+/// </summary>
+SERVICE = 300,
+/// <summary>
+/// Request for a node to store some data for a given amount of time
+/// Nodes using and advertising this service MUST support REF
+/// MUST set arg - OP:::[GET/SET]
+///     MUST set arg - PATH:::[path to data], eg logs/temperature/12011995-12:30:22
+///     Responder MUST respond with INFO
+///         MUST set arg - VALUE:::[value or empty for missing value]
+/// For GET
+/// FOR SET
+///     MUST set arg - VALUE:::[value to store]
+///     MUST set arg - PATH:::[path to data], eg logs/temperature/12011995-12:30:22
+///         SHOULD be relative path, other node decides root
+///         MUST NOT contain characters not allowed in a file path
+///     MAY set arg - UNTIL:::[when the data may be deleted]
+///         If unset, default is forever
+///         Formats: 1y2m3d5h2s, MEM (until node closes)
+///     Responder must explicitly confirm or deny the addition
+///         For deny:
+///             MUST use DENIAL/101
+///             MUST set arg REF:::[request ref]
+///             MUST set arg REASON::[reason]
+///                 - Invalid Path
+///                 - Data size
+///                 - UNTIL too long/too short
+///                 - Unathorised
+///             MAY set arg - REASONDESCRIPTION:::[Human-readable reason]
+///         For confirm:
+///             MUST use INFO/100
+///             MUST set arg - STORED:::[path]
+///             MUST set arg - UNTIL:::[until]
+///                 UNTIL MAY or MAY NOT match requested UNTIL but MUST be at least as long as the request, otherwise MUST deny
+/// </summary>
+STORE = 301,
+/// <summary>
 /// Request from one node to another to stop sending messages
 /// </summary>
 CLOSE = 299,
