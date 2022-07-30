@@ -32,7 +32,15 @@ namespace Socketeering.Messages
             this.destination = destination;
             this.messageType = messageType;
             this.controlArgs = controlArgs ?? new Dictionary<string, string>();
-            this.controlArgs.Add("ID", Guid.NewGuid().ToString());
+            string id = Guid.NewGuid().ToString();
+            if (this.controlArgs.ContainsKey("ID"))
+            {
+                this.controlArgs["ID"] = id;
+            }
+            else
+            {
+                this.controlArgs.Add("ID", id);
+            }
             rawMessage = BuildMessage();
         }
 

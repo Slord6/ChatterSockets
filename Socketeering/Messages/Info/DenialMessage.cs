@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 
 namespace Socketeering.Messages.Info
 {
-    internal class DenialMessage : Message
+    internal class DenialMessage : RefableMessage
     {
         public DenialMessage(string rawMessage) : base(rawMessage)
         {
         }
 
         public DenialMessage(string source, Message incoming, string reason)
-            : base(source, incoming.Source, NodeControl.DENIAL, new Dictionary<string, string>() { { "REQUEST", incoming.MessageType.ToString()}, { "REASON", reason } })
+            : base(source, incoming.Source, NodeControl.DENIAL, incoming.ControlArgs.ContainsKey("ID") ? incoming.ControlArgs["ID"] : null,
+                  new Dictionary<string, string>() { { "REQUEST", incoming.MessageType.ToString()}, { "REASON", reason } })
         {
         }
     }

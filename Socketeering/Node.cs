@@ -124,6 +124,8 @@ namespace Socketeering
             Console.WriteLine("Incoming>>");
             Console.WriteLine(incoming);
             Console.WriteLine("<<End");
+
+            string? @ref = incoming.ControlArgs.ContainsKey("ID") ? incoming.ControlArgs["ID"] : null;
             switch (incoming.MessageType)
             {
                 case NodeControl.INVALID_CONTROL:
@@ -131,19 +133,19 @@ namespace Socketeering
                     break;
                 case NodeControl.NAME:
                     Console.WriteLine("Responding with name");
-                    Send(new Messages.Info.InfoMessage(Name, incoming.Source, new Dictionary<string, string>() { { "REQUEST", incoming.MessageType.ToString() } }));
+                    Send(new Messages.Info.InfoMessage(Name, incoming.Source, @ref, new Dictionary<string, string>() { { "REQUEST", incoming.MessageType.ToString() } }));
                     break;
                 case NodeControl.TIME:
                     Console.WriteLine("Responding with current time");
-                    Send(new Messages.Info.TimeSyncMessage(Name, incoming.Source));
+                    Send(new Messages.Info.TimeSyncMessage(Name, incoming.Source, @ref));
                     break;
                 case NodeControl.VERSION:
                     Console.WriteLine("Responing with version");
-                    Send(new Messages.Info.InfoMessage(Name, incoming.Source, new Dictionary<string, string>() { { "VERSION", version.ToString() } }));
+                    Send(new Messages.Info.InfoMessage(Name, incoming.Source, @ref, new Dictionary<string, string>() { { "VERSION", version.ToString() } }));
                     break;
                 case NodeControl.ECHO:
                     Console.WriteLine("Responding to echo");
-                    Send(new Messages.Info.InfoMessage(Name, incoming.Source, incoming.ControlArgs));
+                    Send(new Messages.Info.InfoMessage(Name, incoming.Source, @ref, incoming.ControlArgs));
                     break;
                 case NodeControl.CONNECTIVITY:
                     bool supported;
@@ -155,7 +157,7 @@ namespace Socketeering
                         Send(new Messages.Error.NotImplementedMessage(Name, incoming, method));
                     } else
                     {
-                        Send(new Messages.Info.ConnectivitySyncMessage(Name, incoming.Source, remote, method, reachable));
+                        Send(new Messages.Info.ConnectivitySyncMessage(Name, incoming.Source, remote, method, reachable, @ref));
                     }
                     break;
                 case NodeControl.CLOSE:

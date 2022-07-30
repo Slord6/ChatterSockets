@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace Socketeering.Messages.Info
 {
-    public class TimeSyncMessage : Message
+    public class TimeSyncMessage : RefableMessage
     {
         public TimeSyncMessage(string rawMessage) : base(rawMessage)
         {
         }
 
-        public TimeSyncMessage(string source, string destination) : base(source, destination, NodeControl.TIME_SYNC,
+        public TimeSyncMessage(string source, string destination, string? @ref) : base(source, destination, NodeControl.TIME_SYNC, @ref,
             new Dictionary<string, string>() { { "TIME", DateTime.Now.ToString() }, { "ZONE", TimeZoneInfo.Local.ToString() } })
         {
         }

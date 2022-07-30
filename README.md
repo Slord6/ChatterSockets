@@ -131,6 +131,7 @@ RELAY = 204,
 /// MAY set any args
 /// Responder MUST echo VALUE
 /// Responder MAY echo other args
+/// Responder MUST NOT echo args ID or REF
 /// </summary>
 ECHO = 205,
 /// <summary>
