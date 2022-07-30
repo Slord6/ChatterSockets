@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -89,15 +90,30 @@ namespace Socketeering
 
         private bool ConnectivityCheck(string method, string remote, out bool supported)
         {
-            if(method.StartsWith("HTTP"))
+            try
             {
-                supported = true;
-                HttpClient client = new HttpClient();
-                Task<HttpResponseMessage> getTask = client.GetAsync(remote);
-                getTask.Wait();
-                return getTask.Result.IsSuccessStatusCode;
-            } else
+                switch (method)
+                {
+                    case "HTTP":
+                    case "HTTPS":
+                        supported = true;
+                        HttpClient client = new HttpClient();
+                        Task<HttpResponseMessage> getTask = client.GetAsync(remote);
+                        getTask.Wait();
+                        return getTask.Result.IsSuccessStatusCode;
+                    case "PING":
+                        supported = true;
+                        Ping pingSender = new Ping();
+                        PingReply reply = pingSender.Send(remote);
+                        return reply.Status == IPStatus.Success;
+                    default:
+                        supported = false;
+                        return false;
+                }
+            }
+            catch (Exception ex)
             {
+                Console.WriteLine("ERR: Connectivity check failed" + ex.Message);
                 supported = false;
                 return false;
             }
@@ -167,6 +183,9 @@ namespace Socketeering
         {
             switch(incoming.MessageType)
             {
+                case NodeControl.INFO:
+                    Console.WriteLine($"INFO: {incoming.Source}: {String.Join(",", incoming.ControlArgs.ToArray())}");
+                    break;
                 case NodeControl.DISCONNECTING:
                     string? waitTime;
                     if (!incoming.ControlArgs.TryGetValue("WILLWAIT", out waitTime)) waitTime = "soon";
