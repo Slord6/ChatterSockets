@@ -12,7 +12,7 @@ namespace Socketeering.Messages.Request
         {
         }
 
-        public TimeMessage(string source, string destination) : base(source, destination, NodeControl.TIME, new Dictionary<string, string>())
+        public TimeMessage(string source, string destination) : base(source, destination, NodeControl.TIME, null)
         {
         }
     }

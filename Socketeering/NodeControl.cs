@@ -15,7 +15,7 @@ namespace Socketeering
     public enum NodeControl
     {
         /// <summary>
-        /// Message containing a node name
+        /// General informational message
         /// MAY include args of key:::val pairs of other information
         /// When used a a response to a request (2*) message:::
         ///     MUST include arg - REQUEST:::[NodeControl] of original request
@@ -23,7 +23,7 @@ namespace Socketeering
         INFO = 100,
         /// <summary>
         /// Notification that a request will not be fulfilled
-        /// MUST not be used as a response to unimplemented controls
+        /// MUST NOT be used as a response to unimplemented controls
         /// MUST include arg - REQUEST:::[type of original request]
         /// MUST include arg- REASON
         /// </summary>
@@ -32,6 +32,8 @@ namespace Socketeering
         /// Message to notify all nodes a node is alive
         /// MUST set destination to *
         /// MAY send arg - "UPTIME:::[node uptime]"
+        /// Nodes SHOULD periodically send ALIVE messages
+        /// Nodes MUST send an initial ALIVE message when they join a network
         /// </summary>
         ALIVE = 102,
         /// <summary>
@@ -52,6 +54,15 @@ namespace Socketeering
         /// MUST set arg - REACHABLE:::[true|false]
         /// </summary>
         CONNECTIVITY_SYNC = 105,
+        /// <summary>
+        /// Message notifying of a node disconnecting from the network
+        /// MAY set arg - WILLWAIT:::[time to disconnect], eg WILLWAIT:2m1s
+        ///     Nodes MAY send updated DISCONNECTING messages with new WILLWAIT estimates
+        ///     Nodes that set arg WILLWAIT MUST stay connected for at least that long unless they send an updated WILLWAIT estimate
+        /// Nodes sending DISCONNECTING messages without WILLWAIT arg SHOULD stay connected for a short time after to recieve any final replies
+        /// Nodes that reply to DISCONNECTING messages SHOULD prioritise replies to these messages based on the WILLWAIT arg
+        /// </summary>
+        DISCONNECTING = 106,
         /// <summary>
         /// Request to send node name
         /// </summary>

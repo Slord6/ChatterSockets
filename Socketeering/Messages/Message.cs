@@ -25,12 +25,14 @@ namespace Socketeering.Messages
         public NodeControl MessageType { get { return messageType; } }
         public Dictionary<string,string> ControlArgs { get { return controlArgs; } }
 
+        // TODO: support optional REF arg
         public Message(string source, string destination, NodeControl messageType, Dictionary<string, string>? controlArgs)
         {
             this.source = source;
             this.destination = destination;
             this.messageType = messageType;
             this.controlArgs = controlArgs ?? new Dictionary<string, string>();
+            this.controlArgs.Add("ID", Guid.NewGuid().ToString());
             rawMessage = BuildMessage();
         }
 

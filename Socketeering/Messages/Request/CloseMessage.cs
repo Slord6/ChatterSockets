@@ -12,7 +12,7 @@ namespace Socketeering.Messages.Request
         {
         }
 
-        public CloseMessage(string source, string destination) : base(source, destination, NodeControl.CLOSE, new Dictionary<string, string>())
+        public CloseMessage(string source, string destination) : base(source, destination, NodeControl.CLOSE, null)
         {
         }
     }
