@@ -155,10 +155,10 @@ SERVICE = 300,
 /// Request for a node to store some data for a given amount of time
 /// Nodes using and advertising this service MUST support REF
 /// MUST set arg - OP:::[GET/SET]
+/// For GET
 ///     MUST set arg - PATH:::[path to data], eg logs/temperature/12011995-12:30:22
 ///     Responder MUST respond with INFO
 ///         MUST set arg - VALUE:::[value or empty for missing value]
-/// For GET
 /// FOR SET
 ///     MUST set arg - VALUE:::[value to store]
 ///     MUST set arg - PATH:::[path to data], eg logs/temperature/12011995-12:30:22
