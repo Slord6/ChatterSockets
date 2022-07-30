@@ -12,7 +12,7 @@ namespace Socketeering.Messages.Info
         {
         }
 
-        public InfoMessage(string source, string destination, string[] controlArgs) : base(source, destination, NodeControl.INFO, controlArgs)
+        public InfoMessage(string source, string destination, Dictionary<string, string> controlArgs) : base(source, destination, NodeControl.INFO, controlArgs)
         {
         }
     }

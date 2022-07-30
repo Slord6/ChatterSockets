@@ -13,8 +13,7 @@ public class Program
         Node node = new Node(gateway);
         Console.WriteLine(node.Name + " active");
 
-        Task autoRespond = node.CreateAutoRespond();
-        autoRespond.Start();
+        node.Start();
         
         Task interactiveSend = node.CreateInteractiveSend();
         interactiveSend.Start();

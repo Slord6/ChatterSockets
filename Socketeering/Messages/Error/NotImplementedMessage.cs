@@ -12,8 +12,10 @@ namespace Socketeering.Messages.Error
         {
         }
 
-        public NotImplementedMessage(string source, string destination, Message incoming)
-            : base(source, destination, NodeControl.DENIAL, new string[] { $"REQUEST:{incoming.MessageType}"})
+        public NotImplementedMessage(string source, Message incoming, string? subset = null) : base(source, incoming.Source, NodeControl.DENIAL,
+            new Dictionary<string, string> {
+                { "REQUEST", incoming.MessageType.ToString() + (subset != null ? $";{subset}" : "" )
+                } })
         {
         }
     }

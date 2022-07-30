@@ -12,9 +12,6 @@ namespace Socketeering
         private readonly static int version = 1;
         private readonly Gateway gateway;
 
-        private bool isActive;
-        public bool IsActive { get => isActive; }
-
         public string Name { get => NameGenerator.GetName(); }
 
         public Node(Gateway gateway)
@@ -70,6 +67,109 @@ namespace Socketeering
             return sessionTask;
         }
 
+        public void Start()
+        {
+            Task autoRespond = CreateAutoRespond();
+            autoRespond.Start();
+            Task periodicPing = new Task(async () =>
+            {
+                while (true)
+                {
+                    AlivePing();
+                    await Task.Delay(new TimeSpan(0, 0, 30));
+                }
+            });
+            periodicPing.Start();
+        }
+
+        private void AlivePing()
+        {
+            Send(new Messages.Info.AliveMessage(Name, null));
+        }
+
+        private bool ConnectivityCheck(string method, string remote, out bool supported)
+        {
+            if(method.StartsWith("HTTP"))
+            {
+                supported = true;
+                HttpClient client = new HttpClient();
+                Task<HttpResponseMessage> getTask = client.GetAsync(remote);
+                getTask.Wait();
+                return getTask.Result.IsSuccessStatusCode;
+            } else
+            {
+                supported = false;
+                return false;
+            }
+        }
+
+        private void HandleRequest(Message incoming)
+        {
+            Console.WriteLine("Incoming>>");
+            Console.WriteLine(incoming);
+            Console.WriteLine("<<End");
+            switch (incoming.MessageType)
+            {
+                case NodeControl.INVALID_CONTROL:
+                    Console.WriteLine("Ignoring, invalid");
+                    break;
+                case NodeControl.NAME:
+                    Console.WriteLine("Responding with name");
+                    Send(new Messages.Info.InfoMessage(Name, incoming.Source, new Dictionary<string, string>() { { "REQUEST", incoming.MessageType.ToString() } }));
+                    break;
+                case NodeControl.TIME:
+                    Console.WriteLine("Responding with current time");
+                    Send(new Messages.Info.TimeSyncMessage(Name, incoming.Source));
+                    break;
+                case NodeControl.VERSION:
+                    Console.WriteLine("Responing with version");
+                    Send(new Messages.Info.InfoMessage(Name, incoming.Source, new Dictionary<string, string>() { { "VERSION", version.ToString() } }));
+                    break;
+                case NodeControl.ECHO:
+                    Console.WriteLine("Responding to echo");
+                    Send(new Messages.Info.InfoMessage(Name, incoming.Source, incoming.ControlArgs));
+                    break;
+                case NodeControl.CONNECTIVITY:
+                    bool supported;
+                    string method = incoming.ControlArgs["METHOD"];
+                    string remote = incoming.ControlArgs["REMOTE"];
+                    bool reachable = ConnectivityCheck(method, remote, out supported);
+                    if(!supported)
+                    {
+                        Send(new Messages.Error.NotImplementedMessage(Name, incoming, method));
+                    } else
+                    {
+                        Send(new Messages.Info.ConnectivitySyncMessage(Name, incoming.Source, remote, method, reachable));
+                    }
+                    break;
+                case NodeControl.CLOSE:
+                    // We deny these
+                    Send(new Messages.Info.DenialMessage(Name, incoming, "Unauthorised"));
+                    break;
+                case NodeControl.RELAY:
+                    Message innerMessage = new Message(incoming.ControlArgs["MESSAGE"]);
+                    if(innerMessage.MessageType == NodeControl.INVALID_CONTROL)
+                    {
+                        Send(new Messages.Info.DenialMessage(Name, incoming, "Malformed forwarding message"));
+                        return;
+                    }
+                    Send(innerMessage);
+                    break;
+                default:
+                    Console.WriteLine("Node does not handle messages of type: " + incoming.MessageType);
+                    Console.WriteLine("Notifying requester");
+                    Send(new Messages.Error.NotImplementedMessage(Name, incoming));
+                    break;
+            }
+        }
+
+        public void HandleErrorNotification(Message incoming)
+        {
+            Console.WriteLine("Notifcation of error>>");
+            Console.WriteLine(incoming.ToString());
+            Console.WriteLine("<<end");
+        }
+
         public Task CreateAutoRespond() {
             {
                 Task sessionTask = new Task(() =>
@@ -78,42 +178,34 @@ namespace Socketeering
                     gateway.RecvMessageContinuous((string messageText) =>
                     {
                         Message incoming = new Message(messageText);
-                        Console.WriteLine("Incoming>>");
-                        Console.WriteLine(incoming);
-                        Console.WriteLine("<<End");
 
-                        if (incoming.Destination != Name && incoming.Destination != "*")
+                        if ((incoming.Destination != Name && incoming.Destination != "*") || incoming.Source == Name)
                         {
-                            Console.WriteLine("Discarded");
+                            Console.WriteLine($"Discarded message {incoming.Source}-->{incoming.Destination}, {incoming.MessageType}, {String.Join(",", incoming.ControlArgs.ToArray())}");
                             return;
                         }
 
-                        switch (incoming.MessageType)
+                        int code = (int)incoming.MessageType;
+                        // Get first digit
+                        int type = Int32.Parse(code.ToString()[0].ToString());
+                        switch (type)
                         {
-                            case NodeControl.INVALID_CONTROL:
-                                Console.WriteLine("Ignoring, invalid");
+                            case 1:
                                 break;
-                            case NodeControl.NAME:
-                                Console.WriteLine("Responding with name");
-                                Send(new Messages.Info.InfoMessage(Name, incoming.Source, new string[] { $"REQUEST:{incoming.MessageType}" }));
+                            case 2:
+                                HandleRequest(incoming);
                                 break;
-                            case NodeControl.TIME:
-                                Console.WriteLine("Responding with current time");
-                                Send(new Messages.Info.TimeSyncMessage(Name, incoming.Source));
-                                break;
-                            case NodeControl.CLOSE:
-                                Console.WriteLine("Ending autorespond");
-                                recvCancellationSource.Cancel();
-                                return;
-                            case NodeControl.VERSION:
-                                Console.WriteLine("Responing with version");
-                                Send(new Messages.Info.InfoMessage(Name, incoming.Source, new string[] { $"VERISON:{version}" }));
+                            case 9:
+                                HandleErrorNotification(incoming);
                                 break;
                             default:
-                                Console.WriteLine("Node does not handle messages of type: " + incoming.MessageType);
-                                Console.WriteLine("Notifying requester");
+                                Console.WriteLine($"Node does not handle messages of type: {type}**");
+                                Console.WriteLine("Notifying requester as not implemented");
+                                Send(new Messages.Error.NotImplementedMessage(Name, incoming));
                                 break;
                         }
+
+
                     }, recvCancellationSource.Token);
                 });
                 return sessionTask;

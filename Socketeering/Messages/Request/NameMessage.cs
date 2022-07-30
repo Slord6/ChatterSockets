@@ -12,7 +12,7 @@ namespace Socketeering.Messages.Request
         {
         }
 
-        public NameMessage(string source, string destination) : base(source, destination, NodeControl.NAME, new string[] { })
+        public NameMessage(string source, string destination) : base(source, destination, NodeControl.NAME, new Dictionary<string, string>())
         {
         }
     }

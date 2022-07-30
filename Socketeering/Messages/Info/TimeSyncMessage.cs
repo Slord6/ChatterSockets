@@ -12,7 +12,8 @@ namespace Socketeering.Messages.Info
         {
         }
 
-        public TimeSyncMessage(string source, string destination) : base(source, destination, NodeControl.TIME_SYNC, new string[] { DateTime.Now.ToString() })
+        public TimeSyncMessage(string source, string destination) : base(source, destination, NodeControl.TIME_SYNC,
+            new Dictionary<string, string>() { { "TIME", DateTime.Now.ToString() }, { "ZONE", TimeZoneInfo.Local.ToString() } })
         {
         }
     }

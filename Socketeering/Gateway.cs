@@ -92,6 +92,7 @@ namespace Socketeering
                 while (true)
                 {
                     string msg = RecvMessageSync();
+                    if (cancellationToken.IsCancellationRequested) return;
                     onMessage(msg);
                 }
             }, cancellationToken);
@@ -105,7 +106,7 @@ namespace Socketeering
 
             do
             {
-                byte[] incomingBuffer = new byte[1024];
+                byte[] incomingBuffer = new byte[2048];
                 recvSocket.Receive(incomingBuffer);
                 str = Encoding.ASCII.GetString(incomingBuffer, 0, incomingBuffer.Length).Trim();
             } while (str.Length == 0);

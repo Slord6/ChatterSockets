@@ -12,8 +12,8 @@ namespace Socketeering.Messages.Info
         {
         }
 
-        public DenialMessage(string source, string destination, Message incoming, string reason)
-            : base(source, destination, NodeControl.DENIAL, new string[] { $"REQUEST:{incoming.MessageType}", $"REASON:{reason}" })
+        public DenialMessage(string source, Message incoming, string reason)
+            : base(source, incoming.Source, NodeControl.DENIAL, new Dictionary<string, string>() { { "REQUEST", incoming.MessageType.ToString()}, { "REASON", reason } })
         {
         }
     }

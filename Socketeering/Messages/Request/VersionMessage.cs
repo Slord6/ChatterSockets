@@ -12,7 +12,7 @@ namespace Socketeering.Messages.Request
         {
         }
 
-        public VersionMessage(string source, string destination) : base(source, destination, NodeControl.VERSION, new string[] { })
+        public VersionMessage(string source, string destination) : base(source, destination, NodeControl.VERSION, new Dictionary<string, string>())
         {
         }
     }
