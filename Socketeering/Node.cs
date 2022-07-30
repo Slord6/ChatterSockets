@@ -163,6 +163,24 @@ namespace Socketeering
             }
         }
 
+        private void HandleInfo(Message incoming)
+        {
+            switch(incoming.MessageType)
+            {
+                case NodeControl.DISCONNECTING:
+                    string? waitTime;
+                    if (!incoming.ControlArgs.TryGetValue("WILLWAIT", out waitTime)) waitTime = "soon";
+                    Console.WriteLine($"{incoming.Source} is disconnecting {waitTime}");
+                    break;
+                case NodeControl.ALIVE:
+                    Console.WriteLine($"{incoming.Source} - PING!");
+                    break;
+                default:
+                    Console.WriteLine("Not implemented info " + incoming.BuildMessage());
+                    break;
+            }
+        }
+
         public void HandleErrorNotification(Message incoming)
         {
             Console.WriteLine("Notifcation of error>>");
@@ -191,6 +209,7 @@ namespace Socketeering
                         switch (type)
                         {
                             case 1:
+                                HandleInfo(incoming);
                                 break;
                             case 2:
                                 HandleRequest(incoming);
