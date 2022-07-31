@@ -127,11 +127,11 @@ namespace Socketeering
         /// <summary>
         /// Request for a node to store some data for a given amount of time
         /// Nodes using and advertising this service MUST support REF
+        /// For GET
         /// MUST set arg - OP:::[GET/SET]
         ///     MUST set arg - PATH:::[path to data], eg logs/temperature/12011995-12:30:22
         ///     Responder MUST respond with INFO
         ///         MUST set arg - VALUE:::[value or empty for missing value]
-        /// For GET
         /// FOR SET
         ///     MUST set arg - VALUE:::[value to store]
         ///     MUST set arg - PATH:::[path to data], eg logs/temperature/12011995-12:30:22
@@ -145,16 +145,19 @@ namespace Socketeering
         ///             MUST use DENIAL/101
         ///             MUST set arg REF:::[request ref]
         ///             MUST set arg REASON::[reason]
-        ///                 - Invalid Path
-        ///                 - Data size
-        ///                 - UNTIL too long/too short
-        ///                 - Unathorised
+        ///                 - NO-DATA - invalid path, empty data
+        ///                 - SIZE - stored data is too large to send
+        ///                 - UNTIL - requested store time is too long/too short
+        ///                 - Unathorised - the node requires authorisation
         ///             MAY set arg - REASONDESCRIPTION:::[Human-readable reason]
-        ///         For confirm:
+        ///         For confirm SET:
         ///             MUST use INFO/100
         ///             MUST set arg - STORED:::[path]
-        ///             MUST set arg - UNTIL:::[until]
+        ///             MAY set arg - UNTIL:::[until]
         ///                 UNTIL MAY or MAY NOT match requested UNTIL but MUST be at least as long as the request, otherwise MUST deny
+        ///         For confirm GET:
+        ///             MUST use INFO/100
+        ///             MUST set arg - VALUE:::[path]
         /// </summary>
         STORE = 301,
         /// <summary>

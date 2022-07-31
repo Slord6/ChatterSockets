@@ -1,4 +1,5 @@
 ﻿using Socketeering.Messages;
+using Socketeering.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,9 @@ namespace Socketeering
         public bool OutputDiscards { get; set; }
         public List<Action<Node, Message>> onMessageArrived { get; private set; }
         public static int KEEP_ALIVE_S = 20;
+
+        // Services
+        StoreServiceHandler storeHandler = new StoreServiceHandler(new KeyValueStoreService());
 
         public Node(Gateway gateway)
         {
@@ -192,6 +196,22 @@ namespace Socketeering
             }
         }
 
+        private void HandleService(Message incoming)
+        {
+            switch(incoming.MessageType)
+            {
+                case NodeControl.STORE:
+                    storeHandler.HandleStoreMessage(incoming, this);
+                    break;
+                default:
+                    Console.WriteLine("Node does not handle messages of type: " + incoming.MessageType);
+                    Console.WriteLine("Notifying requester");
+                    Send(new Messages.Error.NotImplementedMessage(Name, incoming));
+                    break;
+
+            }
+        }
+
         private void HandleErrorNotification(Message incoming)
         {
             Console.WriteLine("Notifcation of error>>");
@@ -226,6 +246,9 @@ namespace Socketeering
                                 break;
                             case 2:
                                 HandleRequest(incoming);
+                                break;
+                            case 3:
+                                HandleService(incoming);
                                 break;
                             case 9:
                                 HandleErrorNotification(incoming);
