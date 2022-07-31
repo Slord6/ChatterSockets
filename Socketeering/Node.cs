@@ -55,24 +55,6 @@ namespace Socketeering
             return new Message(messageText);
         }
 
-        public Task CreateInteractiveSession()
-        {
-            Task sessionTask = new Task(() =>
-            {
-                Task sendTask = CreateInteractiveSend();
-                sendTask.Start();
-
-                gateway.RecvMessageContinuous((string message) =>
-                {
-                    Console.WriteLine("Incoming>>");
-                    Console.WriteLine(message);
-                    Console.WriteLine("<<End");
-                });
-                sendTask.Wait();
-            });
-            return sessionTask;
-        }
-
         public void Start()
         {
             Task autoRespond = CreateAutoRespond();
@@ -81,16 +63,11 @@ namespace Socketeering
             {
                 while (true)
                 {
-                    AlivePing();
+                    Send(new Messages.Info.AliveMessage(Name, null));
                     await Task.Delay(new TimeSpan(0, 0, KEEP_ALIVE_S));
                 }
             });
             periodicPing.Start();
-        }
-
-        private void AlivePing()
-        {
-            Send(new Messages.Info.AliveMessage(Name, null));
         }
 
         private bool ConnectivityCheck(string method, string remote, out bool supported)
@@ -210,7 +187,7 @@ namespace Socketeering
             }
         }
 
-        public void HandleErrorNotification(Message incoming)
+        private void HandleErrorNotification(Message incoming)
         {
             Console.WriteLine("Notifcation of error>>");
             Console.WriteLine(incoming.ToString());
