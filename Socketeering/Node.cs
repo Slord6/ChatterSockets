@@ -14,10 +14,15 @@ namespace Socketeering
         private readonly Gateway gateway;
 
         public string Name { get => NameGenerator.GetName(); }
+        public bool OutputDiscards { get; set; }
+        public List<Action<Node, Message>> onMessageArrived { get; private set; }
+        public static int KEEP_ALIVE_S = 20;
 
         public Node(Gateway gateway)
         {
             this.gateway = gateway;
+            this.OutputDiscards = true;
+            this.onMessageArrived = new List<Action<Node, Message>>();
         }
 
         public void SendSync(Message outgoing)
@@ -77,7 +82,7 @@ namespace Socketeering
                 while (true)
                 {
                     AlivePing();
-                    await Task.Delay(new TimeSpan(0, 0, 30));
+                    await Task.Delay(new TimeSpan(0, 0, KEEP_ALIVE_S));
                 }
             });
             periodicPing.Start();
@@ -197,7 +202,7 @@ namespace Socketeering
                     Console.WriteLine($"{incoming.Source} is disconnecting {waitTime}");
                     break;
                 case NodeControl.ALIVE:
-                    Console.WriteLine($"{incoming.Source} - PING!");
+                    Console.WriteLine($"{incoming.Source} is ALIVE");
                     break;
                 default:
                     Console.WriteLine("Not implemented info " + incoming.BuildMessage());
@@ -223,9 +228,11 @@ namespace Socketeering
 
                         if ((incoming.Destination != Name && incoming.Destination != "*") || incoming.Source == Name)
                         {
-                            Console.WriteLine($"Discarded message {incoming.Source}-->{incoming.Destination}, {incoming.MessageType}, {String.Join(",", incoming.ControlArgs.ToArray())}");
+                            if(OutputDiscards) Console.WriteLine($"Discarded message {incoming.Source}-->{incoming.Destination}, {incoming.MessageType}, {String.Join(",", incoming.ControlArgs.ToArray())}");
                             return;
                         }
+
+                        onMessageArrived.ForEach(a => a(this, incoming));
 
                         int code = (int)incoming.MessageType;
                         // Get first digit
