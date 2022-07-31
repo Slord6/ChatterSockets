@@ -43,6 +43,15 @@ namespace Socketeering
                     return DateTime.Now;
                 }
                 TimeSpan timeSinceTimeSync = DateTime.Now - messageArrival.ArrivedAt;
+
+                // Check that the TIME_SYNC is valid
+                if(!messageArrival.Message.ControlArgs.ContainsKey("TIME"))
+                {
+                    // If it is invalid, remove it and try again
+                    messages.Remove(messageArrival);
+                    return TimeAtNode;
+                }
+
                 return DateTime.Parse(messageArrival.Message.ControlArgs["TIME"]) + timeSinceTimeSync;
             }
         }
