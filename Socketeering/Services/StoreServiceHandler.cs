@@ -59,7 +59,7 @@ namespace Socketeering.Services
             if (storeService.TryGet(req.path, out value))
             {
                 Console.WriteLine($"{incoming.Source} retrieving {value} from {req.path}");
-                InfoMessage message = new InfoMessage(node.Name, incoming.Source, incoming.ControlArgs["ID"], new Dictionary<string, string> { { "VALUE", value } });
+                InfoMessage message = new InfoMessage(node.Name, incoming.Source, incoming.ID, new Dictionary<string, string> { { "VALUE", value } });
                 node.Send(message);
             }
             else
@@ -75,7 +75,7 @@ namespace Socketeering.Services
         {
             Console.WriteLine($"{incoming.Source} is storing {req.value} at {req.path}");
             storeService.Set(req.path, req.value);
-            InfoMessage confMessage = new InfoMessage(node.Name, incoming.Source, incoming.ControlArgs["ID"], new Dictionary<string, string> { { "STORED", req.path } });
+            InfoMessage confMessage = new InfoMessage(node.Name, incoming.Source, incoming.ID, new Dictionary<string, string> { { "STORED", req.path } });
             node.Send(confMessage);
         }
 

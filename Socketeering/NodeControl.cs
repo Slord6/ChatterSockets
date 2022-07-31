@@ -178,6 +178,10 @@ namespace Socketeering
         /// </summary>
         NAME_CLASH = 901,
         /// <summary>
+        /// Notification that a message was recieved and the sender could be parsed, but the contents of the message could not be handled
+        /// </summary>
+        UNPARSABLE = 902,
+        /// <summary>
         /// MUST NOT send. Used to identify malformed messages
         /// </summary>
         INVALID_CONTROL = 9999

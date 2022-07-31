@@ -111,7 +111,7 @@ namespace Socketeering
             Console.WriteLine(incoming);
             Console.WriteLine("<<End");
 
-            string? @ref = incoming.ControlArgs.ContainsKey("ID") ? incoming.ControlArgs["ID"] : null;
+            string? @ref = incoming.ControlArgs.ContainsKey("ID") ? incoming.ID : null;
             switch (incoming.MessageType)
             {
                 case NodeControl.INVALID_CONTROL:
@@ -234,30 +234,39 @@ namespace Socketeering
                             return;
                         }
 
-                        onMessageArrived.ForEach(a => a(this, incoming));
 
-                        int code = (int)incoming.MessageType;
-                        // Get first digit
-                        int type = Int32.Parse(code.ToString()[0].ToString());
-                        switch (type)
+                        try
                         {
-                            case 1:
-                                HandleInfo(incoming);
-                                break;
-                            case 2:
-                                HandleRequest(incoming);
-                                break;
-                            case 3:
-                                HandleService(incoming);
-                                break;
-                            case 9:
-                                HandleErrorNotification(incoming);
-                                break;
-                            default:
-                                Console.WriteLine($"Node does not handle messages of type: {type}**");
-                                Console.WriteLine("Notifying requester as not implemented");
-                                Send(new Messages.Error.NotImplementedMessage(Name, incoming));
-                                break;
+                            onMessageArrived.ForEach(a => a(this, incoming));
+
+                            int code = (int)incoming.MessageType;
+                            // Get first digit
+                            int type = Int32.Parse(code.ToString()[0].ToString());
+                            switch (type)
+                            {
+                                case 1:
+                                    HandleInfo(incoming);
+                                    break;
+                                case 2:
+                                    HandleRequest(incoming);
+                                    break;
+                                case 3:
+                                    HandleService(incoming);
+                                    break;
+                                case 9:
+                                    HandleErrorNotification(incoming);
+                                    break;
+                                default:
+                                    Console.WriteLine($"Node does not handle messages of type: {type}**");
+                                    Console.WriteLine("Notifying requester as not implemented");
+                                    Send(new Messages.Error.NotImplementedMessage(Name, incoming));
+                                    break;
+                            }
+                        } catch (Exception ex)
+                        {
+                            Console.WriteLine("Unparsable message " + incoming.ToString());
+                            Console.WriteLine(ex.Message);
+                            Send(new Messages.Error.UnparsableMessage(Name, incoming));
                         }
 
 

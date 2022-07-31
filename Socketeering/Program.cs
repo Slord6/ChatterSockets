@@ -16,15 +16,31 @@ public class Program
         NetworkState netState = new NetworkState();
         netState.Monitor(node);
 
-        node.onMessageArrived.Add((Node node, Message message) =>
+        Task updateDisplay = new Task(async () =>
         {
-            Console.Clear();
-            Console.WriteLine($"({node.Name}) Node timeout = {RemoteNode.CONNECTED_TIMEOUT_S}s");
+            while (true)
+            {
 
-            Console.WriteLine($"{String.Join("\n", netState.AvailableNodes(node))}");
+                Console.Clear();
+                Console.WriteLine($"({node.Name}) Node timeout = {RemoteNode.CONNECTED_TIMEOUT_S}s");
 
-            netState.DiscardInactiveNodes();
+                Console.WriteLine("\nActive nodes:");
+                Console.WriteLine($"{String.Join("\n", netState.AvailableNodes(node))}");
+
+                await Task.Delay(new TimeSpan(0, 0, 5));
+            }
         });
+        updateDisplay.Start();
+
+        Task removeInactive = new Task(async () =>
+        {
+            while(true)
+            {
+                await Task.Delay(new TimeSpan(0, 0, RemoteNode.CONNECTED_TIMEOUT_S));
+                netState.DiscardInactiveNodes();
+            }
+        });
+        removeInactive.Start();
 
         node.Start();
         Console.WriteLine(node.Name + " started");

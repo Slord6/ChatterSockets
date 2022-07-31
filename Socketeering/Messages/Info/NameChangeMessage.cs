@@ -12,7 +12,7 @@ namespace Socketeering.Messages.Info
         {
         }
 
-        public NameChangeMessage(string source, string destination, string oldName) : base(source, destination, NodeControl.INFO,
+        public NameChangeMessage(string source, string destination, string oldName) : base(source, destination, NodeControl.NAME_CHANGE,
             new Dictionary<string, string>() { { "OLDNAME", oldName} })
         {
         }

@@ -24,6 +24,13 @@ namespace Socketeering.Messages
         public string Destination { get { return destination; } }
         public NodeControl MessageType { get { return messageType; } }
         public Dictionary<string,string> ControlArgs { get { return controlArgs; } }
+        public string ID {
+            get
+            {
+                if(ControlArgs.ContainsKey("ID")) return ControlArgs["ID"];
+                return "?";
+            }
+        }
 
         // TODO: support optional REF arg
         public Message(string source, string destination, NodeControl messageType, Dictionary<string, string>? controlArgs)

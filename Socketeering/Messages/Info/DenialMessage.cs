@@ -13,7 +13,7 @@ namespace Socketeering.Messages.Info
         }
 
         public DenialMessage(string source, Message incoming, string reason)
-            : base(source, incoming.Source, NodeControl.DENIAL, incoming.ControlArgs.ContainsKey("ID") ? incoming.ControlArgs["ID"] : null,
+            : base(source, incoming.Source, NodeControl.DENIAL, incoming.ControlArgs.ContainsKey("ID") ? incoming.ID : null,
                   new Dictionary<string, string>() { { "REQUEST", incoming.MessageType.ToString()}, { "REASON", reason } })
         {
         }
