@@ -181,6 +181,11 @@ namespace Socketeering
                 case NodeControl.ALIVE:
                     Console.WriteLine($"{incoming.Source} is ALIVE");
                     break;
+                case NodeControl.CONNECTIVITY_SYNC:
+                    string remote = incoming.ControlArgs["REMOTE"];
+                    bool reachable = bool.Parse(incoming.ControlArgs["REACHABLE"]);
+                    Console.WriteLine($"{incoming.Source} {(reachable ? "can" : "cannot")} connect to {remote}");
+                    break;
                 default:
                     Console.WriteLine("Not implemented info " + incoming.BuildMessage());
                     break;
