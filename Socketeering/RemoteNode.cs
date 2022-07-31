@@ -11,10 +11,9 @@ namespace Socketeering
         public static int CONNECTED_TIMEOUT_S = 75;
 
         public string Name { get; private set; }
-        private List<Messages.Message> messages;
+        private List<Messages.MessageArrival> messages;
 
         private DateTime lastSeen;
-
         public DateTime LastSeen { get => lastSeen; }
         public TimeSpan TimeSinceLastSeen
         {
@@ -30,11 +29,38 @@ namespace Socketeering
                 return TimeSinceLastSeen.TotalSeconds < CONNECTED_TIMEOUT_S;
             }
         }
+        public DateTime TimeAtNode
+        {
+            get
+            {
+                // Most recent message
+                Messages.MessageArrival? messageArrival = messages
+                    .Where(m => m.Message.MessageType == NodeControl.TIME_SYNC)
+                    .LastOrDefault();
+                // If we don't know for sure, we just assume same as us
+                if(messageArrival == null)
+                {
+                    return DateTime.Now;
+                }
+                TimeSpan timeSinceTimeSync = DateTime.Now - messageArrival.ArrivedAt;
+                return DateTime.Parse(messageArrival.Message.ControlArgs["TIME"]) + timeSinceTimeSync;
+            }
+        }
+        /// <summary>
+        /// We assume that the time offset of a node is how long a TIME_SYNC took to arrive
+        /// </summary>
+        public double EstimatedMessageFlightTimeMs
+        {
+            get
+            {
+                return (DateTime.Now - TimeAtNode).TotalMilliseconds;
+            }
+        }
 
         public RemoteNode(string name)
         {
             this.Name = name;
-            this.messages = new List<Messages.Message>();
+            this.messages = new List<Messages.MessageArrival>();
             lastSeen = DateTime.Now;
         }
 
@@ -46,12 +72,12 @@ namespace Socketeering
         public void AddMessage(Messages.Message message)
         {
             lastSeen = DateTime.Now;
-            this.messages.Add(message);
+            this.messages.Add(new Messages.MessageArrival(message));
         }
 
         public override string ToString()
         {
-            return $"Node ({Name}), {messages.Count} messages recieved. Last seen {TimeSinceLastSeen} ago";
+            return $"Node ({Name}), {messages.Count} messages recieved. Last seen {TimeSinceLastSeen} ago. Flight time {EstimatedMessageFlightTimeMs}ms. Time at node {TimeAtNode}";
         }
     }
 }
