@@ -12,7 +12,7 @@ namespace Socketeering.Messages.Error
         {
         }
 
-        public NameClashMessage(string source, string clashingName) : base(source, "*", NodeControl.CLOSE,
+        public NameClashMessage(string source, string clashingName) : base(source, "*", NodeControl.NAME_CLASH,
             new Dictionary<string, string>() { { "NAME", clashingName } })
         {
         }

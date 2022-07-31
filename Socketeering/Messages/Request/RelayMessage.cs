@@ -12,7 +12,7 @@ namespace Socketeering.Messages.Request
         {
         }
 
-        public RelayMessage(string source, string destination, Message fwdMessage, string toNode) : base(source, destination, NodeControl.CLOSE,
+        public RelayMessage(string source, string destination, Message fwdMessage, string toNode) : base(source, destination, NodeControl.RELAY,
             new Dictionary<string, string>() { { "TO", toNode}, { "MESSAGE", fwdMessage.BuildMessage() } })
         {
         }

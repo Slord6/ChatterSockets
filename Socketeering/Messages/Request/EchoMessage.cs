@@ -12,7 +12,7 @@ namespace Socketeering.Messages.Request
         {
         }
 
-        public EchoMessage(string source, string destination, string value) : base(source, destination, NodeControl.CLOSE,
+        public EchoMessage(string source, string destination, string value) : base(source, destination, NodeControl.ECHO,
             new Dictionary<string, string>() { { "VALUE", value } })
         {
         }

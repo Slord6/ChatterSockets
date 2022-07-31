@@ -12,7 +12,7 @@ namespace Socketeering.Messages.Request
         {
         }
 
-        public ConnectivityMessage(string source, string destination, string remote, string method) : base(source, destination, NodeControl.CLOSE,
+        public ConnectivityMessage(string source, string destination, string remote, string method) : base(source, destination, NodeControl.CONNECTIVITY,
             new Dictionary<string, string>() { { "REMOTE", remote }, { "METHOD", method } })
         {
         }
