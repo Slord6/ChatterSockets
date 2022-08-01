@@ -18,7 +18,9 @@ namespace Socketeering
         private readonly Socket recvSocket;
         private readonly int ttl;
 
-        public Gateway(int port, IPAddress multicastAddress, int ttl)
+        private IPAddress sendAddress;
+
+        public Gateway(int port, IPAddress multicastAddress, int ttl, IPAddress sendAddress)
         {
             PORT = port;
             MULTICAST_ADDRESS = multicastAddress;
@@ -26,6 +28,7 @@ namespace Socketeering
 
             sendSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             recvSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            this.sendAddress = sendAddress;
 
             Connect();
         }
@@ -52,7 +55,7 @@ namespace Socketeering
             if (sendSocket.Connected) return;
 
             // join multicast group
-            sendSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(MULTICAST_ADDRESS));
+            sendSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(MULTICAST_ADDRESS, sendAddress));
 
             // TTL, 1 = within local network (1 hop)
             sendSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastTimeToLive, ttl);
