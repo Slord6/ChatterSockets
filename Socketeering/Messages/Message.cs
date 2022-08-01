@@ -111,6 +111,35 @@ namespace Socketeering.Messages
             return Source + SOURCE_SEP + Destination + DEST_SEP + MessageType.ToString() + TYPE_SEP + string.Join(ARG_SEP, controlArgsStrings);
         }
 
+        protected virtual void SetControlArg(string key, string value)
+        {
+            if (!controlArgs.ContainsKey(key)) controlArgs.Add(key, value);
+            controlArgs[key] = value;
+        }
+
+        /// <summary>
+        /// Only sets if value is non-null
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        protected virtual void SetControlArgSafe(string key, string? value)
+        {
+            if (value == null) return;
+            SetControlArg(key, value);
+        }
+
+        public virtual string? GetControlArg(string key)
+        {
+            if(controlArgs.ContainsKey(key)) return controlArgs[key];
+            return null;
+        }
+
+        public virtual string GetControlArgSafe(string key)
+        {
+            string? controlArg = GetControlArg(key);
+            if (controlArg == null) throw new ArgumentNullException(key);
+            return controlArg;
+        }
 
         public override string ToString()
         {

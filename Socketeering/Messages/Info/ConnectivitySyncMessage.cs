@@ -8,6 +8,24 @@ namespace Socketeering.Messages.Info
 {
     internal class ConnectivitySyncMessage : RefableMessage
     {
+        public string Remote
+        {
+            get => GetControlArgSafe("REMOTE");
+            set => SetControlArg("REMOTE", value);
+        }
+
+        public string Method
+        {
+            get => GetControlArgSafe("METHOD");
+            set => SetControlArg("METHOD", value);
+        }
+
+        public bool Reachable
+        {
+            get => bool.Parse(GetControlArgSafe("REACHABLE"));
+            set => SetControlArg("REACHABLE", value.ToString());
+        }
+
         public ConnectivitySyncMessage(string rawMessage) : base(rawMessage)
         {
         }

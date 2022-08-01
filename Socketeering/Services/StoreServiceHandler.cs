@@ -1,5 +1,6 @@
 ﻿using Socketeering.Messages;
 using Socketeering.Messages.Info;
+using Socketeering.Messages.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,18 +11,21 @@ namespace Socketeering.Services
 {
     internal class StoreServiceHandler
     {
-        private enum Op
-        {
-            GET,
-            SET
-        }
 
         private class StoreRequest
         {
-            public Op op;
+            public Messages.Service.StoreOp op;
             public string path;
             public string? value;
             public string? until;
+
+            public StoreRequest(StoreOp op, string path, string? value, string? until)
+            {
+                this.op = op;
+                this.path = path;
+                this.value = value;
+                this.until = until;
+            }
         }
 
 
@@ -43,10 +47,10 @@ namespace Socketeering.Services
                 if (req == null) return; // This will never happen
                 switch(req.op)
                 {
-                    case Op.GET:
+                    case Messages.Service.StoreOp.GET:
                         Get(req, node, storeMessage);
                         return;
-                    case Op.SET:
+                    case Messages.Service.StoreOp.SET:
                         Set(req, node, storeMessage);
                         return;
                 }
@@ -83,17 +87,17 @@ namespace Socketeering.Services
         {
             try
             {
-                Op op = Enum.Parse<Op>(storeMessage.ControlArgs["OP"]);
+                Messages.Service.StoreOp op = Enum.Parse<Messages.Service.StoreOp>(storeMessage.ControlArgs["OP"]);
                 string path = storeMessage.ControlArgs["PATH"];
                 string? value = null;
-                if (op == Op.SET)
+                if (op == Messages.Service.StoreOp.SET)
                 {
                     value = storeMessage.ControlArgs["VALUE"];
                 }
-                storeRequest = new StoreRequest() { op = op, path = path, value = value };
+                storeRequest = new StoreRequest(op, path, value, null);
                 return true;
             }
-            catch(Exception ex)
+            catch(Exception)
             {
                 storeRequest = null;
                 return false;

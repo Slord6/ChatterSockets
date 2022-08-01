@@ -33,7 +33,7 @@ namespace Socketeering
         /// <summary>
         /// Message to notify all nodes a node is alive
         /// MUST set destination to *
-        /// MAY send arg - "UPTIME:::[node uptime]"
+        /// MAY send arg - UPTIME:::[node uptime (s)]
         /// Nodes SHOULD periodically send ALIVE messages
         /// Nodes MUST send an initial ALIVE message when they join a network
         /// </summary>

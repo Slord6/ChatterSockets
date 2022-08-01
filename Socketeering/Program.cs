@@ -24,10 +24,17 @@ public class Program
             {
 
                 Console.Clear();
-                Console.WriteLine($"({node.Name}) Node timeout = {RemoteNode.CONNECTED_TIMEOUT_S}s");
+                Console.WriteLine($"This Node: ({node.Name})");
+                Console.WriteLine($"Interface: {sendAddress}");
+                Console.WriteLine($"Multicast address: {MULTICASTADDRESS}");
+                Console.WriteLine($"Port: {PORT}");
+                Console.WriteLine($"Node timeout: {RemoteNode.CONNECTED_TIMEOUT_S}s");
+                Console.WriteLine("________________");
 
                 Console.WriteLine("\nActive nodes:");
-                Console.WriteLine($"{String.Join("\n", netState.AvailableNodes(node))}");
+                Console.WriteLine($"{String.Join("\n====\n", netState.AvailableNodes(node))}");
+
+                Console.WriteLine("\n");
 
                 await Task.Delay(new TimeSpan(0, 0, 5));
             }

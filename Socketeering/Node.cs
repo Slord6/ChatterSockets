@@ -22,11 +22,14 @@ namespace Socketeering
         // Services
         StoreServiceHandler storeHandler = new StoreServiceHandler(new KeyValueStoreService());
 
+        private DateTime startedAt;
+
         public Node(Gateway gateway)
         {
             this.gateway = gateway;
             this.OutputDiscards = true;
             this.onMessageArrived = new List<Action<Node, Message>>();
+            this.startedAt = DateTime.Now;
         }
 
         public void SendSync(Message outgoing)
@@ -61,13 +64,14 @@ namespace Socketeering
 
         public void Start()
         {
+            startedAt = DateTime.Now;
             Task autoRespond = CreateAutoRespond();
             autoRespond.Start();
             Task periodicPing = new Task(async () =>
             {
                 while (true)
                 {
-                    Send(new Messages.Info.AliveMessage(Name, null));
+                    Send(new Messages.Info.AliveMessage(Name, (int)(DateTime.Now - startedAt).TotalSeconds));
                     await Task.Delay(new TimeSpan(0, 0, KEEP_ALIVE_S));
                 }
             });
@@ -134,16 +138,15 @@ namespace Socketeering
                     Send(new Messages.Info.InfoMessage(Name, incoming.Source, @ref, incoming.ControlArgs));
                     break;
                 case NodeControl.CONNECTIVITY:
+                    Messages.Request.ConnectivityMessage connMessage = (Messages.Request.ConnectivityMessage)incoming;
                     bool supported;
-                    string method = incoming.ControlArgs["METHOD"];
-                    string remote = incoming.ControlArgs["REMOTE"];
-                    bool reachable = ConnectivityCheck(method, remote, out supported);
+                    bool reachable = ConnectivityCheck(connMessage.Method, connMessage.Remote, out supported);
                     if(!supported)
                     {
-                        Send(new Messages.Error.NotImplementedMessage(Name, incoming, method));
+                        Send(new Messages.Error.NotImplementedMessage(Name, incoming, connMessage.Method));
                     } else
                     {
-                        Send(new Messages.Info.ConnectivitySyncMessage(Name, incoming.Source, remote, method, reachable, @ref));
+                        Send(new Messages.Info.ConnectivitySyncMessage(Name, incoming.Source, connMessage.Remote, connMessage.Method, reachable, @ref));
                     }
                     break;
                 case NodeControl.CLOSE:
@@ -151,7 +154,8 @@ namespace Socketeering
                     Send(new Messages.Info.DenialMessage(Name, incoming, "Unauthorised"));
                     break;
                 case NodeControl.RELAY:
-                    Message innerMessage = new Message(incoming.ControlArgs["MESSAGE"]);
+                    Messages.Request.RelayMessage relayMessage = (Messages.Request.RelayMessage)incoming;
+                    Message innerMessage = relayMessage.Message;
                     if(innerMessage.MessageType == NodeControl.INVALID_CONTROL)
                     {
                         Send(new Messages.Info.DenialMessage(Name, incoming, "Malformed forwarding message"));
@@ -172,23 +176,24 @@ namespace Socketeering
             switch(incoming.MessageType)
             {
                 case NodeControl.INFO:
-                    Console.WriteLine($"INFO: {incoming.Source}: {String.Join(",", incoming.ControlArgs.ToArray())}");
+                    Messages.Info.InfoMessage infoMessage = (Messages.Info.InfoMessage)incoming;
+                    Console.WriteLine($"INFO: {infoMessage.Source}: {String.Join(",", infoMessage.ControlArgs.ToArray())}");
                     break;
                 case NodeControl.TIME_SYNC:
-                    Console.WriteLine($"Time update: {incoming.Source}: {incoming.ControlArgs["TIME"]}");
+                    Messages.Info.TimeSyncMessage timeSyncMessage = (Messages.Info.TimeSyncMessage)incoming;
+                    Console.WriteLine($"Time update: {timeSyncMessage.Source}: {timeSyncMessage.Time}");
                     break;
                 case NodeControl.DISCONNECTING:
-                    string? waitTime;
-                    if (!incoming.ControlArgs.TryGetValue("WILLWAIT", out waitTime)) waitTime = "soon";
-                    Console.WriteLine($"{incoming.Source} is disconnecting {waitTime}");
+                    Messages.Info.DisconnectingMessage disconnectingMessage = (Messages.Info.DisconnectingMessage)incoming;
+                    Console.WriteLine($"{disconnectingMessage.Source} is disconnecting {disconnectingMessage.WillWait ?? "soon"}");
                     break;
                 case NodeControl.ALIVE:
-                    Console.WriteLine($"{incoming.Source} is ALIVE");
+                    Messages.Info.AliveMessage aliveMessage = (Messages.Info.AliveMessage)incoming;
+                    Console.WriteLine($"{aliveMessage.Source} is ALIVE, Uptime: {aliveMessage.Uptime ?? "unknown"}");
                     break;
                 case NodeControl.CONNECTIVITY_SYNC:
-                    string remote = incoming.ControlArgs["REMOTE"];
-                    bool reachable = bool.Parse(incoming.ControlArgs["REACHABLE"]);
-                    Console.WriteLine($"{incoming.Source} {(reachable ? "can" : "cannot")} connect to {remote}");
+                    Messages.Info.ConnectivitySyncMessage connSyncMessage = (Messages.Info.ConnectivitySyncMessage)incoming;
+                    Console.WriteLine($"{connSyncMessage.Source} {(connSyncMessage.Reachable ? "can" : "cannot")} connect to {connSyncMessage.Remote}");
                     break;
                 default:
                     Console.WriteLine("Not implemented info " + incoming.BuildMessage());
@@ -226,7 +231,7 @@ namespace Socketeering
                     CancellationTokenSource recvCancellationSource = new CancellationTokenSource();
                     gateway.RecvMessageContinuous((string messageText) =>
                     {
-                        Message incoming = new Message(messageText);
+                        Message incoming = new Message(messageText).Encapsulate();
 
                         if ((incoming.Destination != Name && incoming.Destination != "*") || incoming.Source == Name)
                         {

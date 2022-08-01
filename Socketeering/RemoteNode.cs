@@ -15,6 +15,24 @@ namespace Socketeering
 
         private DateTime lastSeen;
         public DateTime LastSeen { get => lastSeen; }
+        public int Uptime_s
+        {
+            get
+            {
+                // Most recent message
+                Messages.MessageArrival? messageArrival = messages
+                    .Where(m => m.Message.MessageType == NodeControl.ALIVE)
+                    .LastOrDefault();
+                if (messageArrival == null)
+                {
+                    Messages.MessageArrival? firstMessage = messages.FirstOrDefault();
+                    if (firstMessage == null) return -1;
+                    return (int)(DateTime.Now - firstMessage.ArrivedAt).TotalSeconds;
+                }
+                string? uptime = ((Messages.Info.AliveMessage)messageArrival.Message).Uptime;
+                return int.Parse(uptime ?? "-1");
+            }
+        }
         public TimeSpan TimeSinceLastSeen
         {
             get
@@ -86,7 +104,12 @@ namespace Socketeering
 
         public override string ToString()
         {
-            return $"Node ({Name}), {messages.Count} messages recieved. Last seen {TimeSinceLastSeen} ago. Flight time {EstimatedMessageFlightTimeMs}ms. Time at node {TimeAtNode}";
+            return $"Node ({Name})\n" +
+                $"{messages.Count} messages recieved.\n" +
+                $"Last seen {TimeSinceLastSeen} ago.\n" +
+                $"Flight time {EstimatedMessageFlightTimeMs}ms.\n" +
+                $"Time at node {TimeAtNode}.\n" +
+                $"Uptime: {Uptime_s}s";
         }
     }
 }

@@ -8,6 +8,12 @@ namespace Socketeering.Messages.Request
 {
     internal class RelayMessage : Message
     {
+        public Message Message
+        {
+            get => new Message(GetControlArgSafe("MESSAGE"));
+            set => SetControlArg("MESSAGE", value.BuildMessage());
+        }
+
         public RelayMessage(string rawMessage) : base(rawMessage)
         {
         }

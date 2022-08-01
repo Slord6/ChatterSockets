@@ -8,6 +8,12 @@ namespace Socketeering.Messages.Info
 {
     internal class AliveMessage : Message
     {
+        public string? Uptime
+        {
+            get => GetControlArg("UPTIME") ?? "-1";
+            set => SetControlArgSafe("UPTIME", value);
+        }
+
         public AliveMessage(string rawMessage) : base(rawMessage)
         {
         }

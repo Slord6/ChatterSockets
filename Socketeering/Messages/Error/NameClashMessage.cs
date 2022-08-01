@@ -8,11 +8,23 @@ namespace Socketeering.Messages.Error
 {
     internal class NameClashMessage : Message
     {
+        public string Name
+        {
+            get
+            {
+                return GetControlArgSafe("NAME");
+            }
+            set
+            {
+                SetControlArg("NAME", value);
+            }
+        }
+
         public NameClashMessage(string rawMessage) : base(rawMessage)
         {
         }
 
-        public NameClashMessage(string source, string clashingName) : base(source, "*", NodeControl.NAME_CLASH,
+        public NameClashMessage(string source, string destination, string clashingName) : base(source, destination, NodeControl.NAME_CLASH,
             new Dictionary<string, string>() { { "NAME", clashingName } })
         {
         }

@@ -8,6 +8,12 @@ namespace Socketeering.Messages.Error
 {
     internal class NotImplementedMessage : RefableMessage
     {
+        public string Request
+        {
+            get => GetControlArgSafe("REQUEST");
+            set => SetControlArg("REQUEST", value);
+        }
+
         public NotImplementedMessage(string rawMessage) : base(rawMessage)
         {
         }

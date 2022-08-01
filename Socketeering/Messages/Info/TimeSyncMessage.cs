@@ -8,6 +8,18 @@ namespace Socketeering.Messages.Info
 {
     public class TimeSyncMessage : RefableMessage
     {
+        public string Time
+        {
+            get => GetControlArgSafe("TIME");
+            set => SetControlArg("TIME", value);
+        }
+
+        public string? Zone
+        {
+            get => GetControlArg("ZONE");
+            set => SetControlArg("ZONE", value);
+        }
+
         public TimeSyncMessage(string rawMessage) : base(rawMessage)
         {
         }
