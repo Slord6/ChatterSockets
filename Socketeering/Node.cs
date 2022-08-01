@@ -163,6 +163,16 @@ namespace Socketeering
                     }
                     Send(innerMessage);
                     break;
+                case NodeControl.ALERT:
+                    Messages.Request.AlertMessage alertMessage = (Messages.Request.AlertMessage)incoming;
+                    Console.WriteLine($"Alert from {alertMessage.Source}: {alertMessage.Message ?? "[No text]"}");
+                    Console.Beep();
+                    // Extra beeps for higher priority
+                    for(int i = 0; i < alertMessage.Priority; i+= 250)
+                    {
+                        Console.Beep();
+                    }
+                    break;
                 default:
                     Console.WriteLine("Node does not handle messages of type: " + incoming.MessageType);
                     Console.WriteLine("Notifying requester");

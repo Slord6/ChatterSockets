@@ -83,6 +83,21 @@ namespace Socketeering
                 return (DateTime.Now - TimeAtNode).TotalMilliseconds;
             }
         }
+        public string LastAlertMessage
+        {
+            get
+            {
+                // Most recent message
+                Messages.MessageArrival? messageArrival = messages
+                    .Where(m => m.Message.MessageType == NodeControl.ALERT)
+                    .LastOrDefault();
+                if (messageArrival == null)
+                {
+                    return "";
+                }
+                return ((Messages.Request.AlertMessage)messageArrival.Message).Message ?? "";
+            }
+        }
 
         public RemoteNode(string name)
         {
@@ -109,7 +124,8 @@ namespace Socketeering
                 $"Last seen {TimeSinceLastSeen} ago.\n" +
                 $"Flight time {EstimatedMessageFlightTimeMs}ms.\n" +
                 $"Time at node {TimeAtNode}.\n" +
-                $"Uptime: {Uptime_s}s";
+                $"Uptime: {Uptime_s}s\n" +
+                $"Last alert message: {LastAlertMessage}";
         }
     }
 }

@@ -53,6 +53,8 @@ namespace Socketeering.Messages
                     return new NameClashMessage(message.BuildMessage());
                 case NodeControl.UNPARSABLE:
                     return new UnparsableMessage(message.BuildMessage());
+                case NodeControl.ALERT:
+                    return new AlertMessage(message.BuildMessage());
                 case NodeControl.INVALID_CONTROL:
                     throw new ArgumentException("Message may not be an INVALID_CONTROL message");
                 default:

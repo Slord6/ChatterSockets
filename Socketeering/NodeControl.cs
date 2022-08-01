@@ -108,6 +108,16 @@ namespace Socketeering
         /// </summary>
         ECHO = 205,
         /// <summary>
+        /// Request to alert the user of a node
+        /// MAY set arg - PRIORITY:::[int 0-1000]
+        /// MAY set arg - MESSAGE:::[any message for the user]
+        /// </summary>
+        ALERT = 206,
+        /// <summary>
+        /// Request from one node to another to stop sending messages
+        /// </summary>
+        CLOSE = 299,
+        /// <summary>
         /// Notify of a node-specific service that is available
         /// MUST send a different message for each available service
         /// MUST notify when a service becomes newly available
@@ -160,10 +170,6 @@ namespace Socketeering
         ///             MUST set arg - VALUE:::[path]
         /// </summary>
         STORE = 301,
-        /// <summary>
-        /// Request from one node to another to stop sending messages
-        /// </summary>
-        CLOSE = 299,
         /// <summary>
         /// Notification that a previous request is not implemented
         /// MUST include arg REQUEST:::[original request]
