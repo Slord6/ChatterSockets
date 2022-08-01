@@ -50,6 +50,7 @@ public class Program
             }
         });
         removeInactive.Start();
+        node.onPreMessageArrived.Add(Program.LogMessage);
 
         node.Start();
         Console.WriteLine(node.Name + " started");
@@ -57,6 +58,11 @@ public class Program
         Task interactiveSend = node.CreateInteractiveSend();
         interactiveSend.Start();
         interactiveSend.Wait();
+    }
+
+    private static void LogMessage(Node node, string message)
+    {
+        File.AppendAllText(".\\messages.log", message.Split('\0')[0] + "\n");
     }
 
     private static IPAddress QueryUserForSendAddress()

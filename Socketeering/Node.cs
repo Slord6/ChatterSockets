@@ -17,6 +17,7 @@ namespace Socketeering
         public string Name { get => NameGenerator.GetName(); }
         public bool OutputDiscards { get; set; }
         public List<Action<Node, Message>> onMessageArrived { get; private set; }
+        public List<Action<Node, string>> onPreMessageArrived { get; private set; }
         public static int KEEP_ALIVE_S = 20;
 
         // Services
@@ -29,6 +30,7 @@ namespace Socketeering
             this.gateway = gateway;
             this.OutputDiscards = true;
             this.onMessageArrived = new List<Action<Node, Message>>();
+            this.onPreMessageArrived = new List<Action<Node, string>>();
             this.startedAt = DateTime.Now;
         }
 
@@ -241,6 +243,7 @@ namespace Socketeering
                     CancellationTokenSource recvCancellationSource = new CancellationTokenSource();
                     gateway.RecvMessageContinuous((string messageText) =>
                     {
+                        onPreMessageArrived.ForEach(a => a(this, messageText));
                         Message incoming = new Message(messageText).Encapsulate();
 
                         if ((incoming.Destination != Name && incoming.Destination != "*") || incoming.Source == Name)

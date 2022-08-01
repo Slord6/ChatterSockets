@@ -56,7 +56,7 @@ namespace Socketeering.Messages
                 case NodeControl.ALERT:
                     return new AlertMessage(message.BuildMessage());
                 case NodeControl.INVALID_CONTROL:
-                    throw new ArgumentException("Message may not be an INVALID_CONTROL message");
+                    return message;
                 default:
                     throw new ArgumentException("MessageEncapsulator cannot handle " + message.MessageType);
             }
