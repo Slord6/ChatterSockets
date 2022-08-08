@@ -28,6 +28,9 @@ namespace Socketeering.Messages
                     return new NameChangeMessage(message.BuildMessage());
                 case NodeControl.CONNECTIVITY_SYNC:
                     return new ConnectivitySyncMessage(message.BuildMessage());
+                case NodeControl.PEER_SYNC:
+                    return new PeerSyncMessage(message.BuildMessage());
+
                 case NodeControl.DISCONNECTING:
                     return new DisconnectingMessage(message.BuildMessage());
                 case NodeControl.NAME:
@@ -42,6 +45,11 @@ namespace Socketeering.Messages
                     return new RelayMessage(message.BuildMessage());
                 case NodeControl.ECHO:
                     return new EchoMessage(message.BuildMessage());
+                case NodeControl.ALERT:
+                    return new AlertMessage(message.BuildMessage());
+                case NodeControl.PEERS:
+                    return new PeersMessage(message.BuildMessage());
+
                 case NodeControl.SERVICE:
                     return new StandardServiceMessage(message.BuildMessage());
                 case NodeControl.STORE:
@@ -53,8 +61,6 @@ namespace Socketeering.Messages
                     return new NameClashMessage(message.BuildMessage());
                 case NodeControl.UNPARSABLE:
                     return new UnparsableMessage(message.BuildMessage());
-                case NodeControl.ALERT:
-                    return new AlertMessage(message.BuildMessage());
                 case NodeControl.INVALID_CONTROL:
                     return message;
                 default:

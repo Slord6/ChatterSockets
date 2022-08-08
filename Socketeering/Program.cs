@@ -15,8 +15,7 @@ public class Program
         Gateway gateway = new Gateway(PORT, multicastAddress, TTL, sendAddress);
         Node node = new Node(gateway);
         node.OutputDiscards = false;
-        NetworkState netState = new NetworkState();
-        netState.Monitor(node);
+        NetworkState netState = node.State;
 
         Task updateDisplay = new Task(async () =>
         {

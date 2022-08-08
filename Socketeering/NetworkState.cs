@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Socketeering
 {
-    internal class NetworkState
+    public class NetworkState
     {
         private Dictionary<Node, List<RemoteNode>> remoteNodes;
 

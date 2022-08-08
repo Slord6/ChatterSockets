@@ -15,6 +15,7 @@ namespace Socketeering
         private readonly Gateway gateway;
 
         public string Name { get => NameGenerator.GetName(); }
+        public NetworkState State { get => networkState; }
         public bool OutputDiscards { get; set; }
         public List<Action<Node, Message>> onMessageArrived { get; private set; }
         public List<Action<Node, string>> onPreMessageArrived { get; private set; }
@@ -24,6 +25,7 @@ namespace Socketeering
         StoreServiceHandler storeHandler = new StoreServiceHandler(new KeyValueStoreService());
 
         private DateTime startedAt;
+        private NetworkState networkState;
 
         public Node(Gateway gateway)
         {
@@ -32,6 +34,8 @@ namespace Socketeering
             this.onMessageArrived = new List<Action<Node, Message>>();
             this.onPreMessageArrived = new List<Action<Node, string>>();
             this.startedAt = DateTime.Now;
+            this.networkState = new NetworkState();
+            networkState.Monitor(this);
         }
 
         public void SendSync(Message outgoing)
@@ -175,6 +179,11 @@ namespace Socketeering
                         Console.Beep();
                     }
                     break;
+                case NodeControl.PEERS:
+                    Messages.Request.PeersMessage peersMessage = (Messages.Request.PeersMessage)incoming;
+                    Console.WriteLine($"Peer request from {peersMessage.Source}");
+                    Messages.Info.PeerSyncMessage response = new Messages.Info.PeerSyncMessage(Name, peersMessage.Source, State.AvailableNodes(this).Select(x => x.Name).ToList(), peersMessage.ID);
+                    break;
                 default:
                     Console.WriteLine("Node does not handle messages of type: " + incoming.MessageType);
                     Console.WriteLine("Notifying requester");
@@ -206,6 +215,10 @@ namespace Socketeering
                 case NodeControl.CONNECTIVITY_SYNC:
                     Messages.Info.ConnectivitySyncMessage connSyncMessage = (Messages.Info.ConnectivitySyncMessage)incoming;
                     Console.WriteLine($"{connSyncMessage.Source} {(connSyncMessage.Reachable ? "can" : "cannot")} connect to {connSyncMessage.Remote}");
+                    break;
+                case NodeControl.PEER_SYNC:
+                    Messages.Info.PeerSyncMessage peerSyncMessage = (Messages.Info.PeerSyncMessage)incoming;
+                    Console.WriteLine($"{peerSyncMessage.Source} peers = {string.Join(", ", peerSyncMessage.Peers)}");
                     break;
                 default:
                     Console.WriteLine("Not implemented info " + incoming.BuildMessage());

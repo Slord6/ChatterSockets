@@ -66,6 +66,11 @@ namespace Socketeering
         /// </summary>
         DISCONNECTING = 106,
         /// <summary>
+        /// Message notifying of which other nodes a node knows of
+        /// MUST set arg - PEERS:::[list of peer names, space separated] 
+        /// </summary>
+        PEER_SYNC = 107,
+        /// <summary>
         /// Request to send node name
         /// </summary>
         NAME = 200,
@@ -113,6 +118,10 @@ namespace Socketeering
         /// MAY set arg - MESSAGE:::[any message for the user]
         /// </summary>
         ALERT = 206,
+        /// <summary>
+        /// Request to a node to send a PEER_SYNC message
+        /// </summary>
+        PEERS = 207,
         /// <summary>
         /// Request from one node to another to stop sending messages
         /// </summary>

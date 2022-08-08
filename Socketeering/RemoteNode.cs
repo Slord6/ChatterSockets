@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Socketeering
 {
-    internal class RemoteNode
+    public class RemoteNode
     {
         public static int CONNECTED_TIMEOUT_S = 75;
 
@@ -73,6 +73,24 @@ namespace Socketeering
                 return DateTime.Parse(messageArrival.Message.ControlArgs["TIME"]) + timeSinceTimeSync;
             }
         }
+        public List<string> Peers
+        {
+            get
+            {
+                // Most recent message
+                Messages.MessageArrival? messageArrival = messages
+                    .Where(m => m.Message.MessageType == NodeControl.PEER_SYNC)
+                    .LastOrDefault();
+                // If we don't know for sure, we just assume same as us
+                if (messageArrival == null)
+                {
+                    return new List<string>();
+                }
+
+                List<string> knownPeers = ((Messages.Info.PeerSyncMessage)messageArrival.Message).Peers;
+                return knownPeers;
+            }
+        }
         /// <summary>
         /// We assume that the time offset of a node is how long a TIME_SYNC took to arrive
         /// </summary>
@@ -125,6 +143,7 @@ namespace Socketeering
                 $"Flight time {EstimatedMessageFlightTimeMs}ms.\n" +
                 $"Time at node {TimeAtNode}.\n" +
                 $"Uptime: {Uptime_s}s\n" +
+                $"Peers: {string.Join(", ", Peers)}\n" +
                 $"Last alert message: {LastAlertMessage}";
         }
     }
